@@ -9,7 +9,7 @@ a numerical tolerance.
 """
 
 import dynamics
-import pytorch_utils as ptu
+import common.pytorch_utils as ptu
 import params
 from tqdm import tqdm
 import numpy as np

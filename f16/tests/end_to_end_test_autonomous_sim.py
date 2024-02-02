@@ -1,11 +1,10 @@
 import pickle
 import os
 import numpy as np
-import run_sim
 import dynamics
-import pytorch_utils as ptu
-import plot
+import common.pytorch_utils as ptu
 import copy
+from tqdm import tqdm
 
 CONVERT_MATLAB = True
 DIRECTORY_PATH = 'tests/MATLAB_timehistory/'
@@ -14,6 +13,8 @@ ALLOWABLE_ERROR = 5 # largest delta for altitude always, 5ft is nothing RIGHT
 """This section is purely for conversion into MATLAB, which we only
 do once, and then save into the directory the pickle so we
 never have to interact with .mat files ever again"""
+
+
 
 def mat2pkl(dir_path, filename):
     import scipy.io
@@ -67,7 +68,7 @@ t_end = 30
 dt = 0.001
 
 nlplant = dynamics.NLPlant()
-raw_x_seq_sim = ptu.to_numpy(run_sim.autonomous(nlplant, x0, u0, t_end, dt))
+raw_x_seq_sim = ptu.to_numpy(autonomous(nlplant, x0, u0, t_end, dt))
 
 # create time for plotting
 t_seq = np.linspace(start=0, stop=t_end, num=int(t_end/dt))

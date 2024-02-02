@@ -641,6 +641,94 @@ class NLPlant():
 
         return xdot, accelerations, atmospherics
 
+if __name__ == "__main__":
 
-    
+    """Example usage of code"""
+    import common.pytorch_utils as ptu
+    import numpy as np
+    import torch
+    import trim
+    import copy
+    import plot
+    from tqdm import tqdm
+
+    # gpu activation
+    ptu.init_gpu(
+        use_gpu=not False,
+        gpu_id=0
+    )
+
+    def autonomous(nlplant, x0, u, t_end, dt):
+        print(f"Using {nlplant.lookup_type} LUTs")
+        x_traj = ptu.from_numpy(np.zeros([int(t_end/dt),len(x0)]))
+        x = x0
+        for idx, t in tqdm(enumerate(np.linspace(start=0,stop=t_end,num=int(t_end/dt)))):
+            xdot = nlplant.forward(x0, u)[0]
+            x += xdot*dt
+            x_traj[idx,:] = x 
+        return x_traj
+
+    # instantiate a couple nlplants
+    nlplant_c = NLPlant(lookup_type='C')
+    nlplant_py = NLPlant(lookup_type='Py')
+
+    # get an initial condition by trimming the aircraft at wings level flight
+    # using a couple initial guesses
+
+    # start at velocity of 700 ft/s at 10000 ft altitude
+    altitude = 10000 # ft
+    velocity = 700   # ft/s
+
+    thrust = 5000;          # thrust, lbs
+    elevator = -0.09;       # elevator, degrees
+    alpha = 8.49;           # AOA, degrees
+    rudder = 0.01;          # rudder angle, degrees
+    aileron = -0.01;        # aileron, degrees
+
+    trim_states = trim.wings_level(thrust, elevator, alpha, aileron, rudder, velocity, altitude, nlplant_c, verbose=False)
+
+    # calculate dLEF
+    rho0 = 2.377e-3
+    tfac = 1 - 0.703e-5*altitude
+    temp = 519*tfac
+    if altitude >= 35000:
+        temp = 390
+    rho = rho0*tfac**4.14
+    qbar = 0.5*rho*velocity**2
+    ps = 1715*rho*temp
+    dLEF = 1.38*trim_states[2]*180/np.pi - 9.05*qbar/ps + 1.45
+
+    x0_np = np.array([
+            0,                  # npos
+            0,                  # epos
+            altitude,                # altitude (ft)
+            0*np.pi/180,      # phi (rad)
+            trim_states[2],             # theta (rad)
+            0*np.pi/180,      # psi (rad)
+            velocity,                # velocity (ft/s)
+            trim_states[2],             # alpha (rad)
+            0,                  # beta (rad)
+            0*np.pi/180,        # p (rad/s)
+            0*np.pi/180,        # q ( rad/s)
+            0*np.pi/180,        # r (rad/s)
+            trim_states[0],             # thrust (lbs)
+            trim_states[1],             # elevator (deg)
+            trim_states[3],             # aileron (deg)
+            trim_states[4],             # rudder (deg)
+            dLEF,               # dLEF (deg)
+            -trim_states[2]*180/np.pi   # LF_state (deg)
+        ])
+
+    x0 = ptu.from_numpy(copy.deepcopy(x0_np))
+    u0 = ptu.from_numpy(copy.deepcopy(x0_np[12:16]))
+
+    t_end = 10
+    dt = 0.01
+
+    x_seq_c = autonomous(nlplant_c, torch.clone(x0), torch.clone(u0), t_end, dt)
+    x_seq_py = autonomous(nlplant_py, torch.clone(x0), torch.clone(u0), t_end, dt)
+
+    t_seq = np.linspace(start=0, stop=t_end, num=int(t_end/dt))
+
+    plot.states(ptu.to_numpy(x_seq_py), t_seq)
 
