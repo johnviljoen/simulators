@@ -8,7 +8,6 @@ import numpy as np
 import torch
 import functorch
 import dynamics
-import f16.parameters as parameters
 import common.pytorch_utils as ptu
 import torch
 
