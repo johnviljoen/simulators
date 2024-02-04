@@ -4,7 +4,7 @@ Each directory contains the files specific to its respective simulator. Common c
 
 # Simulators
 
-## Bicycle
+## Bicycle - working
 
 This is a standard planar bicycle model
 
@@ -51,4 +51,12 @@ Complete equations need to be finished - to fully explain the L,M,N total forces
 - $ state = \{  \} $
 - $ input = \{  \} $
 
+# Feature Matrix
 
+| Simulation | Quaternion Attitude | Linearisation | Animation | Differentiable |
+| ---------- | ------------------- | ------------- | --------- | -------------- |
+| Bicycle    | -                   | Y             | N         | Y
+| F16        | N                   | Y             | N         | Y
+| Quadcopter | Y                   | Y             | Y         | Y
+| Satellite  | Y                   | N             | Y         | Y
+| Motorcycle | -                   | -             | -         | -

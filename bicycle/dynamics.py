@@ -51,6 +51,26 @@ class KinematicBicycleModel:
             u[0],
         )
     
+class Linmod:
+
+    @staticmethod
+    def numpy(psi, phi, v, L):
+        A = np.array([
+            [0, 0, np.cos(psi), -v * np.sin(psi)],
+            [0, 0, np.sin(psi), v * np.cos(psi)],
+            [0, 0, np.tan(phi) / L, 0],
+            [0, 0, 0, 0]
+        ])
+        
+        B = np.array([
+            [0, 0],
+            [0, 0],
+            [0, v * (1 / np.cos(phi))**2 / L],
+            [1, 0]
+        ])
+        
+        return A, B
+    
 if __name__ == "__main__":
     Ts = 0.1
     dynamics = KinematicBicycleModel()

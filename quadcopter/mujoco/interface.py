@@ -3,7 +3,7 @@ import copy
 
 import numpy as np
 import mujoco as mj
-import quadcopter_mujoco.utils as utils
+import quadcopter.mujoco.utils as utils
 
 class Interface:
 
