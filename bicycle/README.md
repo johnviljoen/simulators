@@ -41,3 +41,5 @@ The final linear matrices at a given operating point will be found by substituti
 These matrices can then be converted to discrete time, either from first principles or using the scipy.signal.cont2discrete module.
 
 This will provide us the linearised discrete time state space model for the car from which we can apply other control methods.
+ 
+
